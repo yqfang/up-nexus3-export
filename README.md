@@ -1,41 +1,36 @@
-# Nexus 3 export tool
-
-## Purpose
-
-The purpose of this tool is to export a repository from Sonatype Nexus 3. Since version 3, the repositories stored in Nexus are not browsable by filesystem. The tool uses the Nexus API to extract all assets of a given repository. It also supports Basic Authentication, which is useful for repositories requiring authentication.
-
-## Usage
-
-Program takes 2 required arguments plus 1 optional:
-* URL of the Nexus repository
-* Id of the repository in Nexus (e.g. _releases_)
-* (Optional) The local directory for repository to export. If no one is provided, a directory is creeated in the user temp directory
-
-### Authentication
-If the Nexus repoitory requires authentication, specify the username and password in `credentials.properties`. Also set `authenticate` to `true`.
-
-The authentication will then be used for both the Nexus API and to download artifacts from the repository. Make sure the provided user account is allowed to access the Rest API!
-
-**Note** If the password contains special characters (such as "="), place double quotes around the entire password.
-
-### Running from IDE
-
-You can create a Run Configuration by starting the `Nexus3ExportApplication` class. You have to add to specify the previous program arguments.
-
-### Running from CLI
-
-Package the application as a JAR with Maven tool:
+## nexus 导出工具(增量)
 
 ```bash
-$ mvn clean package # (or use provided mvnw tool if you do not have local maven cli tool)
+java -jar nexus3-export-1.0.jar \
+http://127.0.0.1:8081/nexus custom_hosted \
+. \
+com.unionpay.magpie \
+magpie \
+2.1.1.Final
+
+
+# 可以不指定版本号
+
+java -jar nexus3-export-1.0.jar \
+http://127.0.0.1:8081/nexus custom_hosted \
+. \
+com.unionpay.magpie \
+magpie
+
+
+# 甚至不指定组件名称
+
+# 可以不指定版本号
+
+java -jar nexus3-export-1.0.jar \
+http://127.0.0.1:8081/nexus custom_hosted \
+. \
+com.unionpay.magpie
 ```
 
-Then launch the tool:
+## nexus 导入工具（增量）
 
-```bash
-$ java -jar target\nexus3-export-1.0.jar http://url.to/nexus3 releases
+```shell
+# 在根目录下执行
+sh nexus-import.sh -r http://127.0.0.1:8081/nexus/repository/custom_hosted
 ```
-
-## License
-
-The tool is published under MIT license.

@@ -33,6 +33,9 @@ public class DownloadRepository implements Runnable {
 
 	private final String url;
 	private final String repositoryId;
+	private final String groupId;
+	private final String name;
+	private final String version;
 	private Path downloadPath;
 
 	private boolean authenticate;
@@ -46,10 +49,13 @@ public class DownloadRepository implements Runnable {
 	private AtomicLong assetFound = new AtomicLong();
 
 
-	public DownloadRepository(String url, String repositoryId, String downloadPath, boolean authenticate, String username, String password) {
+	public DownloadRepository(String url, String repositoryId, String groupId, String name, String version, String downloadPath, boolean authenticate, String username, String password) {
 		this.url = requireNonNull(url);
 		this.repositoryId = requireNonNull(repositoryId);
 		this.downloadPath = downloadPath == null ? null : Paths.get(downloadPath);
+		this.groupId = requireNonNull(groupId);
+		this.name = name;
+		this.version = version;
 		this.authenticate = authenticate;
 		this.username = username;
 		this.password = password;
@@ -64,7 +70,7 @@ public class DownloadRepository implements Runnable {
 				throw new IOException("Not a writable directory: " + downloadPath);
 
 			LOGGER.info("Starting download of Nexus 3 repository in local directory {}", downloadPath);
-			executorService = Executors.newFixedThreadPool(10);
+			executorService = Executors.newFixedThreadPool(50);
 	
 			if (authenticate) {
 				LOGGER.info("Configuring authentication for Nexus 3 repository");
@@ -121,8 +127,13 @@ public class DownloadRepository implements Runnable {
 		public void run() {
 			LOGGER.info("Retrieving available assets to download");
 			UriComponentsBuilder getAssets = UriComponentsBuilder.fromHttpUrl(url)
-					.pathSegment("service", "rest", "v1", "assets")
-					.queryParam("repository", repositoryId);
+					.pathSegment("service", "rest", "v1", "search", "assets")
+					.queryParam("repository", repositoryId)
+					.queryParam("group", groupId);
+			if (name != null)
+				getAssets = getAssets.queryParam("name", name);
+			if (version != null)
+				getAssets = getAssets.queryParam("version", version);
 			if (continuationToken != null)
 				getAssets = getAssets.queryParam("continuationToken", continuationToken);
 
@@ -144,7 +155,7 @@ public class DownloadRepository implements Runnable {
 
 			assetFound.addAndGet(assets.getItems().size());
 			notifyProgress();
-			assets.getItems().forEach(item -> executorService.submit(new DownloadItemTask(item)));
+			assets.getItems().stream().forEach(item -> executorService.submit(new DownloadItemTask(item)));
 		}
 	}
 

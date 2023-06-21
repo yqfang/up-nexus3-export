@@ -25,13 +25,17 @@ public class Nexus3ExportApplication implements CommandLineRunner {
 			if (args.length >= 2) {
 				String url = args[0];
 				String repoId = args[1];
-				String downloadPath = args.length == 3 ? args[2] : null;
+				String downloadPath = args.length > 2 ? args[2] : null;
+				String groupId = args.length > 3 ? args[3] : null;
+				String name = args.length > 4 ? args[4] : null;
+				String version = args.length > 5 ? args[5] : null;
 
-				Properties credentials = loadCredentials();
-				boolean authenticate = Boolean.valueOf(credentials.getProperty("authenticate", "false"));
-				String username = removeTrailingQuotes(credentials.getProperty("username"));
-				String password = removeTrailingQuotes(credentials.getProperty("password"));
-				new DownloadRepository(url, repoId, downloadPath, authenticate, username, password).start();
+				Properties credentials = new Properties();
+				credentials.setProperty("authenticate", "false");
+				boolean authenticate = false;
+				String username = "admin";
+				String password = "admin";
+				new DownloadRepository(url, repoId, groupId, name, version, downloadPath, authenticate, username, password).start();
 				return;
 			}
 			else
