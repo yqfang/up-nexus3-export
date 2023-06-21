@@ -32,5 +32,5 @@ com.unionpay.magpie
 
 ```shell
 # 在根目录下执行
-sh nexus-import.sh -r http://127.0.0.1:8081/nexus/repository/custom_hosted
+sh /Users/fangyuqing/develop/up-nexus3-export/nexus-import.sh -r http://127.0.0.1:8081/nexus/repository/custom_hosted -u admin -p adminsh /Users/fangyuqing/develop/up-nexus3-export/nexus-import.sh -r http://127.0.0.1:8081/nexus/repository/custom_hosted -u admin -p admin
 ```
